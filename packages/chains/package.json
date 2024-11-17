@@ -11,11 +11,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/pancakeswap/pancake-frontend.git",
+    "url": "https://github.com/xxdex/xxdex-frontend.git",
     "directory": "packages/chains"
   },
   "keywords": [
-    "pancakeswap",
     "chain"
   ],
   "exports": {
