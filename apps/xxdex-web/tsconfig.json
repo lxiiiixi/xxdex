@@ -11,9 +11,7 @@
       "vitest/globals"
     ],
     "paths": {
-      "*": [
-        "./src/*"
-      ],
+      "@/*": ["./src/*"],
       "@xxdex/uikit": [
         "../../packages/uikit/src/index.ts"
       ],
@@ -33,10 +31,13 @@
     "**/config/abi/types/",
     "**/abis/types/*.ts"
   ],
+  "paths": {
+    "@/*": ["./src/*"]
+  },
   "include": [
     "next-env.d.ts",
     "./src/**/*.ts",
     "./src/**/*.tsx",
     ".next/types/**/*.ts"
-  ]
+, "global.d.ts", "global.d.ts"  ]
 }
