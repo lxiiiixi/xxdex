@@ -28,6 +28,7 @@
   "scripts": {
     "lint": "eslint src test",
     "build": "tsup",
+    "build:dts": "tsc --emitDeclarationOnly --declaration",
     "dev": "tsup --watch",
     "test": "vitest --run",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
