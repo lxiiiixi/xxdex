@@ -6,6 +6,7 @@
   },
   "private": true,
   "peerDependencies": {
+    "@xxdex/swap-sdk-core": "workspace:*",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "viem": "catalog:"
