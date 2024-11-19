@@ -1,4 +1,5 @@
 import RootLayout from "@/components/RootLayout";
+import { useTokensByChainIds } from "@/hooks/Tokens";
 
 export default function Home() {
     return (

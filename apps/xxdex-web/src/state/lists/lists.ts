@@ -1,8 +1,8 @@
 import { createListsAtom, createTokenListReducer, NEW_LIST_STATE } from "@xxdex/token-lists/react";
 
 const DEFAULT_LIST_OF_LISTS = [];
-const UNSUPPORTED_LIST_URLS = [];
-const DEFAULT_ACTIVE_LIST_URLS = [];
+const UNSUPPORTED_LIST_URLS:string[] = [];
+const DEFAULT_ACTIVE_LIST_URLS:string[] = [];
 
 export const initialState = {
     lastInitializedDefaultListOfLists: DEFAULT_LIST_OF_LISTS,

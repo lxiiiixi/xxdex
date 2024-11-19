@@ -31,9 +31,20 @@ import { ChainId, ERC20Token, NativeCurrency, Token } from "@xxdex/sdk";
 import { useMemo } from "react";
 import { useReadContracts } from "wagmi";
 import { useActiveChainId } from "./useActiveChainId";
-import { safeGetAddress } from "@/config/utils";
+import { enumKeys, notEmpty, safeGetAddress } from "@/config/utils";
 import { useAtomValue } from "jotai";
-import { TokenAddressMap } from "@xxdex/token-lists";
+import {
+    TokenAddressMap as TTokenAddressMap,
+    TokenList,
+    TokenInfo,
+    WrappedTokenInfo,
+} from "@xxdex/token-lists";
+import { combinedTokenMapFromActiveUrlsAtom } from "@/state/lists/hooks";
+import DEFAULT_TOKEN_LIST from "@/assets/json/SepeliaTokenLists.json";
+import uniqBy from "lodash/uniqBy";
+import groupBy from "lodash/groupBy";
+import mapValues from "lodash/mapValues";
+import keyBy from "lodash/keyBy";
 
 // const mapWithoutUrls = (tokenMap?: TokenAddressMap<ChainId>, chainId?: number) => {
 //     if (!tokenMap || !chainId) return {};
@@ -92,18 +103,59 @@ import { TokenAddressMap } from "@xxdex/token-lists";
 //     }, [userAddedTokens, tokenMap, chainId]);
 // }
 
+type TokenAddressMap = TTokenAddressMap<ChainId>;
+
+const listCache: WeakMap<TokenList, TokenAddressMap> | null =
+    typeof WeakMap !== "undefined" ? new WeakMap<TokenList, TokenAddressMap>() : null;
+
+export function listToTokenMap(list: TokenList, key?: string): TokenAddressMap {
+    const result = listCache?.get(list);
+    if (result) return result;
+
+    const tokenMap: WrappedTokenInfo[] = uniqBy(
+        list.tokens,
+        (tokenInfo: TokenInfo) => `${tokenInfo.chainId}#${tokenInfo.address}`
+    )
+        .map(tokenInfo => {
+            const checksummedAddress = safeGetAddress(tokenInfo.address);
+            if (checksummedAddress) {
+                return new WrappedTokenInfo({ ...tokenInfo, address: checksummedAddress });
+            }
+            return null;
+        })
+        .filter(notEmpty);
+
+    const groupedTokenMap: { [chainId: string]: WrappedTokenInfo[] } = groupBy(tokenMap, "chainId");
+
+    const tokenAddressMap = mapValues(groupedTokenMap, tokenInfoList =>
+        mapValues(keyBy(tokenInfoList, key), tokenInfo => ({ token: tokenInfo, list }))
+    ) as TokenAddressMap;
+
+    // add chain id item if not exist
+    enumKeys(ChainId).forEach(chainId => {
+        if (!(ChainId[chainId] in tokenAddressMap)) {
+            Object.defineProperty(tokenAddressMap, ChainId[chainId], {
+                value: {},
+            });
+        }
+    });
+
+    listCache?.set(list, tokenAddressMap);
+    return tokenAddressMap;
+}
+
 export type TokenChainAddressMap<TChainId extends number = number> = {
     [chainId in TChainId]: {
         [tokenAddress: Address]: ERC20Token;
     };
 };
 
-const tokenMapCache = new WeakMap<TokenAddressMap<ChainId>, string>();
+const tokenMapCache = new WeakMap<TokenAddressMap, string>();
 
 const memoizedTokenMap = memoize(
     (
         chainIds: ChainId[],
-        tokenMap: TokenAddressMap<ChainId>,
+        tokenMap: TokenAddressMap,
         userAddedTokenMap: { [p: number]: Token[] }
     ): TokenChainAddressMap => {
         return chainIds.reduce<TokenChainAddressMap>((tokenMap_, chainId) => {
@@ -144,7 +196,7 @@ const memoizedTokenMap = memoize(
 
 export function useTokensByChainIds(
     chainIds: number[],
-    tokenMap: TokenAddressMap<ChainId>
+    tokenMap: TokenAddressMap
 ): TokenChainAddressMap {
     // const userAddedTokenMap = useUserAddedTokensByChainIds(chainIds);
     return memoizedTokenMap(chainIds, tokenMap, {});
@@ -154,8 +206,17 @@ export function useTokensByChainIds(
  * Returns all tokens that are from active urls and user added tokens
  */
 export function useAllTokensByChainIds(chainIds: number[]): TokenChainAddressMap {
-    const allTokenMap = useAtomValue(combinedTokenMapFromActiveUrlsAtom);
-    return useTokensByChainIds(chainIds, allTokenMap);
+    // const allTokenMap = useAtomValue(combinedTokenMapFromActiveUrlsAtom);
+
+    const defaultTokenMap = listToTokenMap(DEFAULT_TOKEN_LIST as TokenList, "address");
+    // Transform the map structure to match TokenChainAddressMap
+    return Object.entries(defaultTokenMap).reduce((acc, [chainId, tokens]) => {
+        acc[Number(chainId)] = Object.entries(tokens).reduce((tokenAcc, [address, { token }]) => {
+            tokenAcc[address as Address] = token;
+            return tokenAcc;
+        }, {} as { [address: Address]: ERC20Token });
+        return acc;
+    }, {} as TokenChainAddressMap);
 }
 
 // export function useOfficialsAndUserAddedTokensByChainIds(chainIds: number[]): TokenChainAddressMap {

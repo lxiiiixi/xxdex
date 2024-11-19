@@ -24,38 +24,34 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <div className="flex flex-col h-full min-h-screen">
-                    <nav className="flex justify-center gap-4 p-4 shadow-sm">
-                        <Link
-                            href="/"
-                            className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
-                        >
-                            XXdex
-                        </Link>
-                        <Link
-                            href="/swap"
-                            className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
-                        >
-                            Swap
-                        </Link>
-                        <Link
-                            href="/add"
-                            className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
-                        >
-                            Add Liquidity
-                        </Link>
-                        <Link
-                            href="/remove"
-                            className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
-                        >
-                            Remove Liquidity
-                        </Link>
-                    </nav>
-                    <div className="p-10 h-full flex-1 text-center">{children}</div>
-                </div>
-            </body>
-        </html>
+        <div className="flex flex-col h-full min-h-screen">
+            <nav className="flex justify-center gap-4 p-4 shadow-sm">
+                <Link
+                    href="/"
+                    className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
+                >
+                    XXdex
+                </Link>
+                <Link
+                    href="/swap"
+                    className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
+                >
+                    Swap
+                </Link>
+                <Link
+                    href="/add"
+                    className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
+                >
+                    Add Liquidity
+                </Link>
+                <Link
+                    href="/remove"
+                    className="px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-100"
+                >
+                    Remove Liquidity
+                </Link>
+            </nav>
+            <div className="p-10 h-full flex-1 text-center">{children}</div>
+        </div>
     );
 }

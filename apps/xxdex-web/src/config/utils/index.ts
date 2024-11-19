@@ -91,3 +91,11 @@ export function isTokenOnList(
     if (currency?.isNative) return true;
     return Boolean(currency?.isToken && defaultTokens[currency.chainId]?.[currency.address]);
 }
+
+export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+    return value !== null && value !== undefined;
+}
+
+export function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
+    return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
+}
